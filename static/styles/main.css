@@ -39,3 +39,47 @@
     margin: auto;
     color: rgb(5, 5, 110);
 }
+
+/* for admin_dashboards */
+
+.navbar-custom {
+    background-color: #d0f0c0;
+  }
+  .lot-card {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px;
+  }
+  .spot {
+    width: 30px;
+    height: 30px;
+    margin: 2px;
+    text-align: center;
+    line-height: 30px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  .occupied {
+    background-color: #f8c8dc;
+  }
+  .available {
+    background-color: #aef3ae;
+  }
+
+
+  /* for user_dashboards */
+
+
+  .box {
+    border: 2px solid #a3c9f9;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    color: #1e66d1;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
