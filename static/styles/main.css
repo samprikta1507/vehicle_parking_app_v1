@@ -83,3 +83,84 @@
     margin-bottom: 10px;
   }
   
+  /* for users in admin dashboard */
+  body {
+    font-family: Arial, sans-serif;
+  }
+
+  .navbar-custom {
+    background-color: #d0f0c0;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .dashboard-title {
+    font-size: 22px;
+    color: #c0392b;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .section-title {
+    color: #216ef3;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+
+  .box {
+    border: 2px solid #a3c9f9;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  .footer-note {
+    color: red;
+    font-style: italic;
+    margin-top: 10px;
+    text-align: left;
+  }
+
+  /* for admin summary page */
+
+
+
+  .summary-subtitle {
+    color: #e67e22;
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+
+
+/* for search bar */
+
+.search-section {
+  margin: 30px auto;
+  text-align: center;
+}
+
+.search-section select,
+.search-section input {
+  padding: 8px;
+  margin: 5px;
+  font-size: 16px;
+}
+
+.search-title {
+  color: #2980b9;
+  font-size: 20px;
+  margin: 30px 0 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* for user summary page */
+.chart-container {
+  width: 50%;
+  margin: 50px auto;
+  text-align: center;
+}

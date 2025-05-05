@@ -14,17 +14,27 @@
                     <div class="container-fluid">
                       <span class="navbar-brand fw-bold text-danger">Welcome to Admin</span>
                       <div class="navbar-nav">
-                        <a class="nav-link" href="#">Home</a>
-                        <a class="nav-link" href="#">Users</a>
-                        <a class="nav-link" href="#">Search</a>
-                        <a class="nav-link" href="#">Summary</a>
-                        <a class="nav-link" href="#">Logout</a>
+                        <a class="nav-link" href="admin_dashboard.html">Home</a>
+                        <a class="nav-link" href="users.html">Users</a>
+                        <a class="nav-link" href="admin_summary.html">Summary</a>
+                        <a class="nav-link" href="login.html">Logout</a>
                       </div>
                       <div class="ms-auto">
-                        <a href="#" class="text-primary">Edit Profile</a>
+                        <a href="edit_profile.html" class="text-primary">Edit Profile</a>
                       </div>
                     </div>
                 </nav>
+                <!-- Search Section -->
+                <div class="search-section">
+                  <label class="fw-bold">Search by</label>
+                  <select>
+                    <option value="user">User ID</option>
+                    <option value="location">Location</option>
+                  </select>
+                  <input type="text" placeholder="Enter search string">
+                  <button class="btn btn-primary btn-sm">Search</button>
+                </div>
+
                 <div class="container mt-4">
                     <h3 class="text-primary mb-3">Parking Lots</h3>
                   
@@ -34,8 +44,8 @@
                       <div class="col-md-4">
                         <div class="lot-card">
                           <h5>Parking #1</h5>
-                          <a href="#" class="text-success">Edit</a> |
-                          <a href="#" class="text-danger">Delete</a>
+                          <a href="edit_parking_lot.html" class="text-success">Edit</a> |
+                          <a href="delete_parking_lot.html" class="text-danger">Delete</a>
                           <p class="text-success mt-2">(Occupied: 3/15)</p>
                           <div class="d-flex flex-wrap">
                             <!-- Example spots -->
@@ -55,8 +65,8 @@
                       <div class="col-md-4">
                         <div class="lot-card">
                           <h5>Parking #2</h5>
-                          <a href="#" class="text-success">Edit</a> |
-                          <a href="#" class="text-danger">Delete</a>
+                          <a href="edit_parking_lot.html" class="text-success">Edit</a> |
+                          <a href="delete_parking_lot.html" class="text-danger">Delete</a>
                           <p class="text-success mt-2">(Occupied: 4/10)</p>
                           <div class="d-flex flex-wrap">
                             <div class="spot available">A</div>
@@ -76,9 +86,10 @@
                   
                     <!-- Add Lot Button -->
                     <div class="text-center mt-4">
-                      <a href="#" class="btn btn-info">+ Add Lot</a>
+                      <a href="add_parking_lot.html" class="btn btn-info">+ Add Lot</a>
                     </div>
-                  </div>
-                  
+                </div>
+            </div>
+        </div>          
     </body>
 </html>
