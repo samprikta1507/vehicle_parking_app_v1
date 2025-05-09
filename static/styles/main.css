@@ -40,6 +40,12 @@
     color: rgb(5, 5, 110);
 }
 
+.err_msg{
+  text-align: center;
+  margin: auto;
+  color: maroon;
+}
+
 /* for admin_dashboards */
 
 .navbar-custom {
