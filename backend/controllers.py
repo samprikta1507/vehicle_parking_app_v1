@@ -110,3 +110,7 @@ def manage_spot(spot_id):
 def get_parking_lots():
     parking_lots=Parking_lot.query.all()
     return parking_lots
+
+
+
+# done the auth today too
