@@ -50,28 +50,46 @@
 
 .navbar-custom {
     background-color: #d0f0c0;
-  }
-  .lot-card {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 15px;
-    margin: 10px;
-  }
-  .spot {
-    width: 30px;
-    height: 30px;
-    margin: 2px;
-    text-align: center;
-    line-height: 30px;
-    border-radius: 5px;
-    font-weight: bold;
-  }
-  .occupied {
-    background-color: #f8c8dc;
-  }
-  .available {
-    background-color: #aef3ae;
-  }
+}
+.lot-card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px;
+}
+.spot {
+  width: 30px;
+  height: 30px;
+  margin: 2px;
+  text-align: center;
+  line-height: 30px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.spot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  gap: 5px;
+  margin-top: 10px;
+}
+.spot-box {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: center;
+  line-height: 38px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.spot-box.available {
+  background-color: #a7f3d0; /* Green */
+}
+.spot-box.occupied {
+  background-color: #f87171; /* Red */
+}
+
 
 
   /* for user_dashboards */

@@ -12,57 +12,43 @@
                 </div>
 
                 <div class="container mt-4">
+                  {% if parking_lots %}
                     <h3 class="text-primary mb-3">Parking Lots</h3>
-                  
                     <div class="row">
-                  
+                      {% for parking_lot in parking_lots %}
                       <!-- Parking Lot 1 -->
                       <div class="col-md-4">
                         <div class="lot-card">
-                          <h5>Parking #1</h5>
+                          <h5>{{parking_lot.name}}</h5>
+                          <h6>{{parking_lot.address}}</h6>
                           <a href="edit_parking_lot.html" class="text-success">Edit</a> |
                           <a href="delete_parking_lot.html" class="text-danger">Delete</a>
-                          <p class="text-success mt-2">(Occupied: 3/15)</p>
-                          <div class="d-flex flex-wrap">
-                            <!-- Example spots -->
-                            <div class="spot occupied">O</div>
-                            <div class="spot occupied">O</div>
-                            <div class="spot available">A</div>
-                            <div class="spot occupied">O</div>
-                            <div class="spot available">A</div>
-                            <div class="spot available">A</div>
-                            <div class="spot available">A</div>
-                            <div class="spot available">A</div>
-                          </div>
+                          <p class="text-info mt-2">Max_spots:{{parking_lot.max_spots}}</p>
+                          <p class="text-info mt-2">Price:{{parking_lot.price}}</p>
+                          {% if parking_lot.spots %}
+                            <div class="spot-grid mt-2">
+                              {% for spot in parking_lot.spots %}
+                                <form method="POST" action="{{ url_for('manage_spot', spot_id=spot.id) }}">
+                                  <button type="submit"
+                                          class="spot-box {% if spot.status == 'O' %}occupied{% else %}available{% endif %}">
+                                    {{ spot.status }}
+                                  </button>
+                                </form>
+                              {% endfor %}
+                            </div>
+                          {% else %}
+                            <p>No occupied here !!!</p>
+                          {% endif %}
                         </div>
                       </div>
-                  
-                      <!-- Parking Lot 2 -->
-                      <div class="col-md-4">
-                        <div class="lot-card">
-                          <h5>Parking #2</h5>
-                          <a href="edit_parking_lot.html" class="text-success">Edit</a> |
-                          <a href="delete_parking_lot.html" class="text-danger">Delete</a>
-                          <p class="text-success mt-2">(Occupied: 4/10)</p>
-                          <div class="d-flex flex-wrap">
-                            <div class="spot available">A</div>
-                            <div class="spot available">A</div>
-                            <div class="spot occupied">O</div>
-                            <div class="spot occupied">O</div>
-                            <div class="spot available">A</div>
-                            <div class="spot occupied">O</div>
-                            <div class="spot available">A</div>
-                          </div>
-                        </div>
-                      </div>
-                  
-                      <!-- Add More Parking Lots Here -->
-                  
+                      {% endfor %}                  
                     </div>
-                  
+                    {% else %}
+                    <h3 class="center"> No parking lots are available!!!</h3>
+                    {% endif %}
                     <!-- Add Lot Button -->
                     <div class="text-center mt-4">
-                      <a href="add_parking_lot.html" class="btn btn-info">+ Add Lot</a>
+                      <a href="/parking_lot/{{name}}" type="button" class="btn btn-info">+ Add Lot</a>
                     </div>
                 </div>
 {% endblock %}
