@@ -1,0 +1,24 @@
+{% extends "admin_layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3 class="center">Spot Details</h3>
+    <div class="input_form">
+        <div class="mb-3">
+            <label>Spot ID:</label>
+            <input type="text" class="form-control" value="{{ spot.id }}" readonly>
+        </div>
+        <div class="mb-3">
+            <label>Status:</label>
+            <input type="text" class="form-control" value="{{ spot.status }}" readonly>
+        </div>
+
+        {% if spot.status == 'A' %}
+        <a href="{{ url_for('delete_spot', spot_id=spot.id, lot_id=lot_id, name=name) }}" class="btn btn-danger">Delete</a>
+        {% else %}
+        <button class="btn btn-secondary" disabled>Cannot Delete (Occupied)</button>
+        {% endif %}
+
+        <a href="{{ url_for('admin_dashboard', name=name) }}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+{% endblock %}

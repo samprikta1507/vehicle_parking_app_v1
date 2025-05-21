@@ -21,19 +21,20 @@
                         <div class="lot-card">
                           <h5>{{parking_lot.name}}</h5>
                           <h6>{{parking_lot.address}}</h6>
-                          <a href="edit_parking_lot.html" class="text-success">Edit</a> |
-                          <a href="delete_parking_lot.html" class="text-danger">Delete</a>
+                          <a href="{{ url_for('edit_parking_lot', lot_id=parking_lot.id, name=name) }}" class="text-success">Edit</a> |
+                          <a href="{{ url_for('delete_parking_lot', lot_id=parking_lot.id, name=name) }}" class="text-danger">Delete</a>
                           <p class="text-info mt-2">Max_spots:{{parking_lot.max_spots}}</p>
                           <p class="text-info mt-2">Price:{{parking_lot.price}}</p>
                           {% if parking_lot.spots %}
                             <div class="spot-grid mt-2">
                               {% for spot in parking_lot.spots %}
-                                <form method="POST" action="{{ url_for('manage_spot', spot_id=spot.id) }}">
-                                  <button type="submit"
+                                <a href="{{ url_for('view_spot', spot_id=spot.id, lot_id=parking_lot.id, name=name) }}">
+                                  <button type="button" 
                                           class="spot-box {% if spot.status == 'O' %}occupied{% else %}available{% endif %}">
                                     {{ spot.status }}
                                   </button>
-                                </form>
+                                </a>
+
                               {% endfor %}
                             </div>
                           {% else %}
