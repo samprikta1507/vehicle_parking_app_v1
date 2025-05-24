@@ -11,6 +11,7 @@
                         <th>Location</th>
                         <th>Spot No</th>
                         <th>Park Time</th>
+                        <th>End Time</th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -21,13 +22,23 @@
                         <td>{{ r.parking_lot.address }}</td>
                         <td>{{ r.parking_spot.id }}</td>
                         <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                          <td>
-                            <form method="POST" action="{{ url_for('release_reservation', reservation_id=r.id, name=name) }}">
-                              <button type="submit" class="btn btn-outline-danger">Release</button>
+                        <td>{{ r.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                          {% if r.parking_spot.status == 'A' %}
+                            <!-- Show Start Parking button -->
+                            <form method="POST" action="{{ url_for('start_parking', reservation_id=r.id, name=name) }}" class="d-inline">
+                              <button type="submit" class="btn btn-outline-primary btn-sm">Start Parking</button>
                             </form>
-                          </td>
+                          {% elif r.parking_spot.status == 'O' %}
+                            <!-- Show Release Parking button -->
+                            <form method="POST" action="{{ url_for('release_reservation', reservation_id=r.id, name=name) }}" class="d-inline">
+                              <button type="submit" class="btn btn-outline-danger btn-sm">Release</button>
+                            </form>
+                          {% endif %}
+                        </td>
                       </tr>
                       {% endfor %}
+
 
                       {% for r in ended_reservations %}
                       <tr>
@@ -35,6 +46,7 @@
                         <td>{{ r.parking_lot.address }}</td>
                         <td>{{ r.parking_spot.id }}</td>
                         <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ r.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
                         <td><button class="btn btn-outline-success" disabled>Ended</button></td>
                       </tr>
                       {% endfor %}

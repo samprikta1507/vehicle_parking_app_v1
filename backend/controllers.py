@@ -226,32 +226,26 @@ def book_spot(lot_id, name):
     if not user:
         return "User not found", 404
 
-    # Get available spot
+    # Find available spot
     spot = Parking_spot.query.filter_by(lot_id=lot_id, status='A').first()
     if not spot:
         return "No available spots", 400
 
-    # Parse time inputs
+    # Parse times
     try:
         start_time_str = request.form.get("start_time")
-        if not start_time_str:
-            park_time = datetime.utcnow()  # fallback to now
-        else:
-            park_time = datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
+        park_time = datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M") if start_time_str else datetime.utcnow()
+        if park_time < datetime.utcnow():
+            return "Start time cannot be in the past.", 400
 
         duration_hours = int(request.form.get("duration"))
-        park_time = datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
         end_time = park_time + timedelta(hours=duration_hours)
-
-        if park_time < datetime.now():
-            return "Start time cannot be in the past.", 400
-        
     except Exception as e:
-        return f"Invalid time input: {e}", 400
+        return f"Invalid input: {e}", 400
 
-    # Mark spot and create reservation
-    spot.status = 'O'
     lot = Parking_lot.query.get(lot_id)
+
+    # Create reservation (status stays 'A' until start_parking is called)
     reservation = Reservation(
         park_time=park_time,
         end_time=end_time,
@@ -265,15 +259,32 @@ def book_spot(lot_id, name):
 
     return redirect(url_for("user_dashboard", name=name))
 
+# for start parking in spot
+
+@app.route("/start/<int:reservation_id>/<name>", methods=["POST"])
+def start_parking(reservation_id, name):
+    reservation = Reservation.query.get_or_404(reservation_id)
+    spot = Parking_spot.query.get(reservation.spot_id)
+
+    # Update spot status to 'O'
+    if spot.status != 'O':
+        spot.status = 'O'
+        db.session.commit()
+
+    return redirect(url_for("user_dashboard", name=name))
+
+
 # for relese spot
 
 @app.route("/release/<int:reservation_id>/<name>", methods=["POST"])
 def release_reservation(reservation_id, name):
     reservation = Reservation.query.get_or_404(reservation_id)
-    reservation.end_time = datetime.utcnow()
-    
     spot = Parking_spot.query.get(reservation.spot_id)
-    spot.status = 'A'
+    reservation.end_time = datetime.utcnow()
+
+  
+    if spot.status != 'A':
+        spot.status = 'A'
     
     db.session.commit()
     return redirect(url_for("user_dashboard", name=name))
