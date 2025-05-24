@@ -14,9 +14,9 @@
                     <div class="container-fluid">
                     <span class="navbar-brand fw-bold text-danger">Welcome {{name}}</span>
                     <div class="navbar-nav">
-                        <a class="nav-link" href="user_dashboard.html">Home</a>
-                        <a class="nav-link" href="user_summary.html">Summary</a>
-                        <a class="nav-link" href="login.html">Logout</a>
+                        <a class="nav-link" href="{{ url_for('user_dashboard', name=name) }}">Home</a>
+                        <a class="nav-link" href="{{ url_for('user_summary', name=name) }}">Summary</a>
+                        <a class="nav-link" href="{{ url_for('signin') }}">Logout</a>
                     </div>
                     <div class="ms-auto">
                         <a href="user_edit_profile.html" class="text-primary">Edit Profile</a>

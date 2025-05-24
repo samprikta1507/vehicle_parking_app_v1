@@ -1,6 +1,7 @@
 # App routes
 from flask import Flask,render_template,request,redirect,url_for
 from flask import current_app as app
+from datetime import datetime, timedelta
 from .models import *
 
 @app.route("/")
@@ -54,7 +55,35 @@ def admin_dashboard(name):
 # common route for user dashboard
 @app.route("/user/<name>")
 def user_dashboard(name):
-    return render_template("user_dashboard.html",name=name)
+    user = User.query.filter_by(email=name).first()
+    if not user:
+        return "User not found", 404
+
+    reservations = Reservation.query.filter_by(user_id=user.id).order_by(Reservation.park_time.desc()).limit(5).all()
+    current_time = datetime.now()
+    active_reservations = Reservation.query.filter(Reservation.user_id == user.id,Reservation.end_time > datetime.utcnow()).order_by(Reservation.park_time.desc()).all()
+    ended_reservations = Reservation.query.filter(Reservation.user_id == user.id,Reservation.end_time <= datetime.utcnow()).order_by(Reservation.park_time.desc()).all()
+
+    # Search logic
+    search_query = request.form.get("location") if request.method == "POST" else "place name"
+    parking_lots = Parking_lot.query.filter(Parking_lot.address.ilike(f"%{search_query}%")).all()
+
+    # Add available spot count to each lot
+
+    all_lots = Parking_lot.query.all()
+    available_data = []
+    for lot in all_lots:
+        total_spots = len(lot.spots)
+        available_spots = len([s for s in lot.spots if s.status == 'A'])
+        available_data.append({
+            "id": lot.id,
+            "name": lot.name,
+            "address": lot.address,
+            "available_spots": available_spots,
+            "total_spots": total_spots
+        })
+
+    return render_template("user_dashboard.html",name=name,reservations=reservations,search_query=search_query,parking_lots=parking_lots, available_data=available_data,now=current_time,active_reservations=active_reservations, ended_reservations=ended_reservations)
 
 @app.route("/parking_lot/<name>",methods=["GET","POST"])
 def add_parking_lot(name):
@@ -186,3 +215,68 @@ def admin_users(name):
 @app.route("/admin/<name>/summary")
 def admin_summary(name):
     return render_template("admin_summary.html", name=name)
+
+
+# for book spot
+
+@app.route("/book/<int:lot_id>/<name>", methods=["POST"])
+def book_spot(lot_id, name):
+    user = User.query.filter_by(email=name).first()
+    if not user:
+        return "User not found", 404
+
+    # Get available spot
+    spot = Parking_spot.query.filter_by(lot_id=lot_id, status='A').first()
+    if not spot:
+        return "No available spots", 400
+
+    # Parse time inputs
+    try:
+        start_time_str = request.form.get("start_time")
+        if not start_time_str:
+            park_time = datetime.utcnow()  # fallback to now
+        else:
+            park_time = datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
+
+        duration_hours = int(request.form.get("duration"))
+        park_time = datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
+        end_time = park_time + timedelta(hours=duration_hours)
+
+        if park_time < datetime.now():
+            return "Start time cannot be in the past.", 400
+        
+    except Exception as e:
+        return f"Invalid time input: {e}", 400
+
+    # Mark spot and create reservation
+    spot.status = 'O'
+    lot = Parking_lot.query.get(lot_id)
+    reservation = Reservation(
+        park_time=park_time,
+        end_time=end_time,
+        cost=lot.price * duration_hours,
+        lot_id=lot_id,
+        spot_id=spot.id,
+        user_id=user.id
+    )
+    db.session.add(reservation)
+    db.session.commit()
+
+    return redirect(url_for("user_dashboard", name=name))
+
+# for relese spot
+
+@app.route("/release/<int:reservation_id>/<name>", methods=["POST"])
+def release_reservation(reservation_id, name):
+    reservation = Reservation.query.get_or_404(reservation_id)
+    reservation.end_time = datetime.utcnow()
+    
+    spot = Parking_spot.query.get(reservation.spot_id)
+    spot.status = 'A'
+    
+    db.session.commit()
+    return redirect(url_for("user_dashboard", name=name))
+
+@app.route("/user/<name>/summary")
+def user_summary(name):
+    return render_template("user_summary.html", name=name)

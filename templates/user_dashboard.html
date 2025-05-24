@@ -9,60 +9,98 @@
                       <tr>
                         <th>ID</th>
                         <th>Location</th>
-                        <th>Vehicle No</th>
-                        <th>Timestamp</th>
+                        <th>Spot No</th>
+                        <th>Park Time</th>
+                        <th>End Time</th>
                         <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
+                      {% for r in active_reservations %}
                       <tr>
-                        <td>120</td>
-                        <td>xxxxx</td>
-                        <td>TN318888</td>
-                        <td>xx-xx-xx</td>
-                        <td><a href="release_parking_spot.html"><button type="button" class="btn btn-outline-danger">Release</button></a></td>
+                        <td>{{ r.id }}</td>
+                        <td>{{ r.parking_lot.address }}</td>
+                        <td>{{ r.parking_spot.id }}</td>
+                        <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ r.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                          <td>
+                            <form method="POST" action="{{ url_for('release_reservation', reservation_id=r.id, name=name) }}">
+                              <button type="submit" class="btn btn-outline-danger">Release</button>
+                            </form>
+                          </td>
                       </tr>
+                      {% endfor %}
+
+                      {% for r in ended_reservations %}
                       <tr>
-                        <td>142</td>
-                        <td>xxxxx</td>
-                        <td>AP310921</td>
-                        <td>xx-xx-xx</td>
-                        <td><button type="button" class="btn btn-outline-success">Parked Out</button></td>
+                        <td>{{ r.id }}</td>
+                        <td>{{ r.parking_lot.address }}</td>
+                        <td>{{ r.parking_spot.id }}</td>
+                        <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ r.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td><button class="btn btn-outline-success" disabled>Ended</button></td>
                       </tr>
+                      {% endfor %}
                     </tbody>
+
                   </table>
                 </div>
 
                 <!-- Search -->
-                <div class="mb-3 text-danger fw-bold">Search parking @location/pin code:
-                  <input type="text" value="Dadar Road" class="form-control d-inline w-auto ms-2">
+                <div class="mb-3 text-danger fw-bold">
+                  <form method="POST" class="mb-4">
+                    <label for="location" class="fw-bold">Search parking by location/pin:</label>
+                    <input type="text" name="location" value="{{ search_query }}" class="form-control d-inline w-50 mx-2" required>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                  </form>
                 </div>
 
                 <!-- Available Parking Lots -->
                 <div class="box">
-                  <div class="section-title">Parking Lots @ Dadar Road</div>
+                  <div class="section-title">Parking Lots</div>
                   <table class="table table-bordered text-center">
                     <thead class="table-light">
                       <tr>
                         <th>ID</th>
+                        <th>Name</th>
                         <th>Address</th>
                         <th>Availability</th>
                         <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>132</td>
-                        <td>K. Gadgil Marg, xxxxx</td>
-                        <td class="text-success">6</td>
-                        <td><a href="book_parking_spot.html"><button type="button" class="btn btn-outline-info">book</button></a></td>
+                      {% for lot in available_data %}
+                        <tr>
+                          <td>{{ lot.id }}</td>
+                          <td>{{ lot.name }}</td>
+                          <td>{{ lot.address }}</td>
+                          <td>{{ lot.available_spots }}/{{ lot.total_spots }}</td>
+                          <td>
+                            {% if lot.available_spots > 0 %}
+                              <form method="POST" action="{{ url_for('book_spot', lot_id=lot.id, name=name) }}">
+                                <div class="row">
+                                  <div class="col">
+                                    <input type="datetime-local" name="start_time" value="{{ now.strftime('%Y-%m-%dT%H:%M') }}" min="{{ now.strftime('%Y-%m-%dT%H:%M') }}" required class="form-control">
+                                  </div>
+                                  <div class="col">
+                                    <select name="duration" required class="form-control">
+                                      <option value="1">1 hour</option>
+                                      <option value="2">2 hours</option>
+                                      <option value="3">3 hours</option>
+                                      <option value="4">4 hours</option>
+                                    </select>
+                                  </div>
+                                  <div class="col">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">Book</button>
+                                  </div>
+                                </div>
+                              </form>
+                          {% else %}
+                            <button class="btn btn-outline-secondary" disabled>Full</button>
+                          {% endif %}
+                        </td>
                       </tr>
-                      <tr>
-                        <td>136</td>
-                        <td>Wadala, xxxxx, xxxx</td>
-                        <td class="text-success">10</td>
-                        <td><a href="book_parking_spot.html"><button type="button" class="btn btn-outline-info">book</button></a></td>
-                      </tr>
+                      {% endfor %}
                     </tbody>
                   </table>
 {% endblock %}
