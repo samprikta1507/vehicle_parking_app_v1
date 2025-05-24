@@ -214,7 +214,8 @@ def admin_users(name):
 
 @app.route("/admin/<name>/summary")
 def admin_summary(name):
-    return render_template("admin_summary.html", name=name)
+    reservations = Reservation.query.order_by(Reservation.park_time.desc()).all()
+    return render_template("admin_summary.html", name=name,reservations=reservations)
 
 
 # for book spot
@@ -279,4 +280,13 @@ def release_reservation(reservation_id, name):
 
 @app.route("/user/<name>/summary")
 def user_summary(name):
-    return render_template("user_summary.html", name=name)
+    user = User.query.filter_by(email=name).first()
+    if not user:
+        return "User not found", 404
+
+    history = Reservation.query.filter_by(user_id=user.id).order_by(Reservation.park_time.desc()).all()
+
+    total_cost = sum([r.cost for r in history])
+    total_hours = sum([(r.end_time - r.park_time).total_seconds() / 3600 for r in history])
+
+    return render_template("user_summary.html", name=name,user=user,history=history,total_cost=round(total_cost, 2), total_hours=int(total_hours))

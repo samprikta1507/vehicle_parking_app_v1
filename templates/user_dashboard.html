@@ -11,7 +11,6 @@
                         <th>Location</th>
                         <th>Spot No</th>
                         <th>Park Time</th>
-                        <th>End Time</th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -22,7 +21,6 @@
                         <td>{{ r.parking_lot.address }}</td>
                         <td>{{ r.parking_spot.id }}</td>
                         <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                        <td>{{ r.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
                           <td>
                             <form method="POST" action="{{ url_for('release_reservation', reservation_id=r.id, name=name) }}">
                               <button type="submit" class="btn btn-outline-danger">Release</button>
@@ -37,7 +35,6 @@
                         <td>{{ r.parking_lot.address }}</td>
                         <td>{{ r.parking_spot.id }}</td>
                         <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                        <td>{{ r.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
                         <td><button class="btn btn-outline-success" disabled>Ended</button></td>
                       </tr>
                       {% endfor %}
