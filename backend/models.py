@@ -43,8 +43,10 @@ class Parking_spot(db.Model):
 class Reservation(db.Model):
     __tablename__="reservation"
     id=db.Column(db.Integer,primary_key=True)
-    park_time=db.Column(db.DateTime,nullable=False)
-    end_time=db.Column(db.DateTime,nullable=False)
+    start_time =db.Column(db.DateTime,nullable=False) # scheduled start
+    end_time=db.Column(db.DateTime,nullable=False) # scheduled end
+    park_time=db.Column(db.DateTime,nullable=True) # actual start
+    release_time=db.Column(db.DateTime,nullable=True) # actual end
     cost=db.Column(db.Float,default=0.0)
     lot_id=db.Column(db.Integer, db.ForeignKey("parking_lot.id"),nullable=False)
     spot_id=db.Column(db.Integer, db.ForeignKey("parking_spot.id"),nullable=False)

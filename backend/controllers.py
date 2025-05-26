@@ -3,6 +3,8 @@ from flask import Flask,render_template,request,redirect,url_for
 from flask import current_app as app
 from datetime import datetime, timedelta
 from .models import *
+import math
+
 
 @app.route("/")
 def home():
@@ -215,89 +217,154 @@ def admin_users(name):
 @app.route("/admin/<name>/summary")
 def admin_summary(name):
     reservations = Reservation.query.order_by(Reservation.park_time.desc()).all()
+    total_minutes = 0
+    total_cost = 0
+
+    for r in reservations:
+        if r.park_time and r.release_time:
+            duration_sec = (r.release_time - r.park_time).total_seconds()
+            minutes = duration_sec / 60
+
+            price_per_hour = r.parking_lot.price 
+            cost_per_minute = price_per_hour / 60
+
+            r.cost = round(minutes * cost_per_minute, 2)
+        else:
+            r.cost = 0  
     return render_template("admin_summary.html", name=name,reservations=reservations)
 
-
-# for book spot
-
-@app.route("/book/<int:lot_id>/<name>", methods=["POST"])
-def book_spot(lot_id, name):
-    user = User.query.filter_by(email=name).first()
-    if not user:
-        return "User not found", 404
-
-    # Find available spot
-    spot = Parking_spot.query.filter_by(lot_id=lot_id, status='A').first()
-    if not spot:
-        return "No available spots", 400
-
-    # Parse times
-    try:
-        start_time_str = request.form.get("start_time")
-        park_time = datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M") if start_time_str else datetime.utcnow()
-        if park_time < datetime.utcnow():
-            return "Start time cannot be in the past.", 400
-
-        duration_hours = int(request.form.get("duration"))
-        end_time = park_time + timedelta(hours=duration_hours)
-    except Exception as e:
-        return f"Invalid input: {e}", 400
-
-    lot = Parking_lot.query.get(lot_id)
-
-    # Create reservation (status stays 'A' until start_parking is called)
-    reservation = Reservation(
-        park_time=park_time,
-        end_time=end_time,
-        cost=lot.price * duration_hours,
-        lot_id=lot_id,
-        spot_id=spot.id,
-        user_id=user.id
-    )
-    db.session.add(reservation)
-    db.session.commit()
-
-    return redirect(url_for("user_dashboard", name=name))
-
-# for start parking in spot
-
-@app.route("/start/<int:reservation_id>/<name>", methods=["POST"])
-def start_parking(reservation_id, name):
-    reservation = Reservation.query.get_or_404(reservation_id)
-    spot = Parking_spot.query.get(reservation.spot_id)
-
-    # Update spot status to 'O'
-    if spot.status != 'O':
-        spot.status = 'O'
-        db.session.commit()
-
-    return redirect(url_for("user_dashboard", name=name))
-
-
-# for relese spot
-
-@app.route("/release/<int:reservation_id>/<name>", methods=["POST"])
-def release_reservation(reservation_id, name):
-    reservation = Reservation.query.get_or_404(reservation_id)
-    spot = Parking_spot.query.get(reservation.spot_id)
-    reservation.end_time = datetime.utcnow()
-
-  
-    if spot.status != 'A':
-        spot.status = 'A'
-    
-    db.session.commit()
-    return redirect(url_for("user_dashboard", name=name))
 
 @app.route("/user/<name>/summary")
 def user_summary(name):
     user = User.query.filter_by(email=name).first()
     if not user:
-        return "User not found", 404
+        return redirect(url_for('login'))
 
-    history = Reservation.query.filter_by(user_id=user.id).order_by(Reservation.park_time.desc()).all()
+    history = Reservation.query.filter_by(user_id=user.id)\
+        .filter(Reservation.park_time.isnot(None))\
+        .filter(Reservation.release_time.isnot(None))\
+        .order_by(Reservation.park_time.desc()).all()
 
-    total_cost = sum([r.cost for r in history])
-    total_hours = sum([(r.end_time - r.park_time).total_seconds() / 3600 for r in history])
+    total_minutes = 0
+    total_cost = 0
 
-    return render_template("user_summary.html", name=name,user=user,history=history,total_cost=round(total_cost, 2), total_hours=int(total_hours))
+    for reservation in history:
+        if reservation.park_time and reservation.release_time:
+            duration_sec = (reservation.release_time - reservation.park_time).total_seconds()
+            minutes = duration_sec / 60
+            total_minutes += minutes
+
+            price_per_hour = reservation.parking_lot.price 
+            cost_per_minute = price_per_hour / 60
+            reservation.cost = round(minutes * cost_per_minute, 2)
+            total_cost += reservation.cost
+
+    return render_template("user_summary.html", user=user, name=name, history=history, total_minutes=int(total_minutes), total_cost=round(total_cost, 2))
+
+# for book spot
+
+@app.route('/book_spot/<int:lot_id>/<string:name>', methods=['POST'])
+def book_spot(lot_id, name):
+    user = User.query.filter_by(email=name).first()
+    if not user:
+        return redirect(url_for('user_dashboard', name=name))
+    
+    lot = Parking_lot.query.get_or_404(lot_id)
+
+    start_time_str = request.form['start_time']
+    duration = int(request.form['duration'])
+
+    start_time = datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M')
+    end_time = start_time + timedelta(hours=duration)
+
+
+    spot = Parking_spot.query.filter_by(lot_id=lot_id, status='A').first()
+    if not spot:
+        return redirect(url_for('user_dashboard', name=name))
+
+    reservation = Reservation(
+        start_time=start_time,
+        end_time=end_time,
+        park_time=None,  
+        release_time=None, 
+        lot_id=lot_id,
+        spot_id=spot.id,
+        user_id=user.id
+    )
+
+
+    spot.status = 'R'  
+    
+    db.session.add(reservation)
+    db.session.commit()
+
+    return redirect(url_for('user_dashboard', name=name))
+
+
+
+# for start parking in spot
+@app.route('/start_parking/<int:reservation_id>/<string:name>', methods=['POST'])
+def start_parking(reservation_id, name):
+    reservation = Reservation.query.get_or_404(reservation_id)
+
+    if reservation.park_time is None:
+        reservation.park_time = datetime.now()
+
+        spot = Parking_spot.query.get(reservation.spot_id)
+        spot.status = 'O'  
+        db.session.commit()
+    return redirect(url_for('user_dashboard', name=name))
+
+# for relese spot
+@app.route('/release_reservation/<int:reservation_id>/<string:name>', methods=['POST'])
+def release_reservation(reservation_id, name):
+    reservation = Reservation.query.get_or_404(reservation_id)
+    
+    if reservation.park_time is None:
+        return redirect(url_for('user_dashboard', name=name))
+    
+    if reservation.release_time is not None:
+        return redirect(url_for('user_dashboard', name=name))
+
+    reservation.release_time = datetime.now()
+
+    duration_sec = (reservation.release_time - reservation.park_time).total_seconds()
+    hours = math.ceil(duration_sec / 3600)
+    
+    rate = reservation.parking_lot.price
+    reservation.cost = hours * rate
+
+    spot = Parking_spot.query.get(reservation.spot_id)
+    spot.status = 'A' 
+
+    db.session.commit()
+
+    return redirect(url_for('user_dashboard', name=name))
+
+
+
+# for edit ptofile for both user and admin dashboard 
+
+@app.route('/edit_profile/<string:name>', methods=['GET', 'POST'])
+def edit_profile(name):
+    user = User.query.filter_by(email=name).first_or_404()
+
+    if request.method == 'POST':
+        full_name = request.form.get('full_name')
+        address = request.form.get('address')
+        pin_code = request.form.get('pin_code')
+
+        if not full_name or not address or not pin_code.isdigit():
+            return redirect(url_for('edit_profile', name=name))
+
+        user.full_name = full_name
+        user.address = address
+        user.pin_code = int(pin_code)
+        db.session.commit()
+
+        if user.role == 0:
+            return redirect(url_for('admin_dashboard', name=name))
+        else:
+            return redirect(url_for('user_dashboard', name=name))
+
+    return render_template('edit_profile.html', user=user, name=name)

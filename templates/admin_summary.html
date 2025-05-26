@@ -21,14 +21,16 @@
                         <tbody>
                             {% for r in reservations %}
                             <tr>
-                            <td>{{ r.id }}</td>
-                            <td>{{ r.user.email }}</td>
-                            <td>{{ r.parking_lot.name }}</td>
-                            <td>{{ r.parking_spot.id }}</td>
-                            <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                            <td>{{ r.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                            <td>{{ r.cost }}</td>
+                                <td>{{ r.id }}</td>
+                                <td>{{ r.user.email }}</td>
+                                <td>{{ r.parking_lot.name }}</td>
+                                <td>{{ r.parking_spot.id }}</td>
+                                <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') if r.park_time else 'N/A' }}</td>
+                                <td>{{ r.release_time.strftime('%Y-%m-%d %H:%M') if r.release_time else 'N/A' }}</td>
+                                <td>₹{{ r.cost }}</td>
                             </tr>
+
+
                             {% endfor %}
                         </tbody>
                         </table>

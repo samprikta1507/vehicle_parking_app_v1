@@ -10,48 +10,49 @@
                         <th>ID</th>
                         <th>Location</th>
                         <th>Spot No</th>
-                        <th>Park Time</th>
-                        <th>End Time</th>
+                        <th>Actual Start</th>
+                        <th>Actual End</th>
                         <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {% for r in active_reservations %}
-                      <tr>
-                        <td>{{ r.id }}</td>
-                        <td>{{ r.parking_lot.address }}</td>
-                        <td>{{ r.parking_spot.id }}</td>
-                        <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                        <td>{{ r.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                        <td>
-                          {% if r.parking_spot.status == 'A' %}
-                            <!-- Show Start Parking button -->
-                            <form method="POST" action="{{ url_for('start_parking', reservation_id=r.id, name=name) }}" class="d-inline">
-                              <button type="submit" class="btn btn-outline-primary btn-sm">Start Parking</button>
-                            </form>
-                          {% elif r.parking_spot.status == 'O' %}
-                            <!-- Show Release Parking button -->
-                            <form method="POST" action="{{ url_for('release_reservation', reservation_id=r.id, name=name) }}" class="d-inline">
-                              <button type="submit" class="btn btn-outline-danger btn-sm">Release</button>
-                            </form>
-                          {% endif %}
-                        </td>
-                      </tr>
-                      {% endfor %}
-
-
-                      {% for r in ended_reservations %}
-                      <tr>
-                        <td>{{ r.id }}</td>
-                        <td>{{ r.parking_lot.address }}</td>
-                        <td>{{ r.parking_spot.id }}</td>
-                        <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                        <td>{{ r.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                        <td><button class="btn btn-outline-success" disabled>Ended</button></td>
-                      </tr>
+                        <tr>
+                          <td>{{ r.id }}</td>
+                          <td>{{ r.parking_lot.address }}</td>
+                          <td>{{ r.parking_spot.id }}</td>
+                          <td>
+                            {% if r.park_time %}
+                              {{ r.park_time.strftime('%Y-%m-%d %H:%M') }}
+                            {% else %}
+                              -
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if r.release_time %}
+                              {{ r.release_time.strftime('%Y-%m-%d %H:%M') }}
+                            {% else %}
+                              -
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if not r.park_time %}
+                              <!-- Show Start Parking -->
+                              <form method="POST" action="{{ url_for('start_parking', reservation_id=r.id, name=name) }}" class="d-inline">
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Start Parking</button>
+                              </form>
+                            {% elif not r.release_time %}
+                              <!-- Show Release -->
+                              <form method="POST" action="{{ url_for('release_reservation', reservation_id=r.id, name=name) }}" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Release</button>
+                              </form>
+                            {% else %}
+                              <button class="btn btn-outline-success btn-sm" disabled>Ended</button>
+                            {% endif %}
+                          </td>
+                        </tr>
                       {% endfor %}
                     </tbody>
-
                   </table>
                 </div>
 

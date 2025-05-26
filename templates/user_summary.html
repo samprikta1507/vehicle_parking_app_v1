@@ -11,7 +11,7 @@
         <th>Spot</th>
         <th>Start Time</th>
         <th>End Time</th>
-        <th>Duration (hrs)</th>
+        <th>Duration (mins)</th>
         <th>Cost</th>
       </tr>
     </thead>
@@ -21,28 +21,34 @@
         <td>{{ r.id }}</td>
         <td>{{ r.parking_lot.name }}</td>
         <td>{{ r.parking_spot.id }}</td>
-        <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') }}</td>
-        <td>{{ r.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
-        <td>{{ ((r.end_time - r.park_time).total_seconds() // 3600)|int }}</td>
-        <td>{{ r.cost }}</td>
+        <td>{{ r.park_time.strftime('%Y-%m-%d %H:%M') if r.park_time else 'N/A' }}</td>
+        <td>{{ r.release_time.strftime('%Y-%m-%d %H:%M') if r.release_time else 'N/A' }}</td>
+        <td>
+          {% if r.park_time and r.release_time %}
+            {{ ((r.release_time - r.park_time).total_seconds() // 60)|int }}
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+        <td>₹{{ r.cost }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7">No parking history found</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 <div class="mt-3 fw-bold">
-  Total Hours: {{ total_hours }} hrs  
+  Total Duration: {{ total_minutes }} minutes
   <br>
   Total Cost: ₹{{ total_cost }}
 </div>
 
-
 <!-- Content -->
-            <div class="chart-container">
-                
-                <canvas id="usageChart"></canvas>
-                <div class="chart-label">Summary on already used parking spots</div>
-            </div>
+<div class="chart-container">
+    <canvas id="usageChart"></canvas>
+    <div class="chart-label">Summary on already used parking spots</div>
+</div>
 {% endblock %}
-
-
