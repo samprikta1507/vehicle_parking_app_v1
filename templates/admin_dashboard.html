@@ -1,15 +1,19 @@
 {% extends "admin_layout.html" %}
 {% block content %}
                 <!-- Search Section -->
-                <div class="search-section">
+              <div class="search-section mb-4">
+                <form method="GET" action="{{ url_for('admin_dashboard_search', name=name) }}">
                   <label class="fw-bold">Search by</label>
-                  <select>
+                  <select name="filter_by" class="form-select d-inline w-auto mx-2">
                     <option value="user">User ID</option>
                     <option value="location">Location</option>
+                    <option value="name">Parking Lot Name</option>
                   </select>
-                  <input type="text" placeholder="Enter search string">
-                  <button class="btn btn-primary btn-sm">Search</button>
-                </div>
+                  <input type="text" name="query" placeholder="Enter search string" class="form-control d-inline w-50 mx-2" required>
+                  <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                </form>
+              </div>
+
 
                 <div class="container mt-4">
                   {% if parking_lots %}

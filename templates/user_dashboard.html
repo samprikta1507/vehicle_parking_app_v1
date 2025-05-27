@@ -58,12 +58,14 @@
 
                 <!-- Search -->
                 <div class="mb-3 text-danger fw-bold">
-                  <form method="POST" class="mb-4">
+                  <form method="GET" class="mb-4" action="{{ url_for('user_dashboard_search', name=name) }}">
                     <label for="location" class="fw-bold">Search parking by location/pin:</label>
-                    <input type="text" name="location" value="{{ search_query }}" class="form-control d-inline w-50 mx-2" required>
+                    <input type="text" name="location" value="{{ request.args.get('location', '') }}" class="form-control d-inline w-50 mx-2" required>
                     <button type="submit" class="btn btn-primary">Search</button>
+                    <a href="{{ url_for('user_dashboard', name=name) }}" class="btn btn-secondary">Clear</a>
                   </form>
                 </div>
+
 
                 <!-- Available Parking Lots -->
                 <div class="box">

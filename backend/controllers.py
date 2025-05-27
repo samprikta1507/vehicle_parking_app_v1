@@ -217,8 +217,7 @@ def admin_users(name):
 @app.route("/admin/<name>/summary")
 def admin_summary(name):
     reservations = Reservation.query.order_by(Reservation.park_time.desc()).all()
-    total_minutes = 0
-    total_cost = 0
+
 
     for r in reservations:
         if r.park_time and r.release_time:
@@ -368,3 +367,58 @@ def edit_profile(name):
             return redirect(url_for('user_dashboard', name=name))
 
     return render_template('edit_profile.html', user=user, name=name)
+
+# for search funtion in user_dashboard 
+@app.route("/user/<name>/dashboard/search", methods=["GET"])
+def user_dashboard_search(name):
+    user = User.query.filter_by(email=name).first()
+    if not user:
+        return redirect(url_for('signin'))
+
+    search_query = request.args.get("location", "").strip().lower()
+
+    now = datetime.now()
+
+    active_reservations = Reservation.query.filter_by(user_id=user.id)\
+        .filter(Reservation.release_time.is_(None))\
+        .order_by(Reservation.park_time.desc()).all()
+
+    parking_lots = Parking_lot.query.all()
+    filtered_lots = []
+    for lot in parking_lots:
+        if search_query in lot.name.lower() or search_query in lot.address.lower():
+            total_spots = lot.max_spots
+            occupied_spots = Parking_spot.query.filter_by(lot_id=lot.id, status="occupied").count()
+            lot.available_spots = total_spots - occupied_spots
+            lot.total_spots = total_spots
+            filtered_lots.append(lot)
+
+    return render_template("user_dashboard.html", name=name, active_reservations=active_reservations, available_data=filtered_lots, now=now, search_query=search_query)
+
+# for search function in admin_dashboard
+
+@app.route("/admin/<name>/dashboard/search")
+def admin_dashboard_search(name):
+    filter_by = request.args.get("filter_by")
+    query = request.args.get("query")
+
+    parking_lots = []
+
+    if filter_by == "location":
+        parking_lots = Parking_lot.query.filter(Parking_lot.address.ilike(f"%{query}%")).all()
+
+    elif filter_by == "name":
+        parking_lots = Parking_lot.query.filter(Parking_lot.name.ilike(f"%{query}%")).all()
+
+    elif filter_by == "user":
+        parking_lots = (
+            db.session.query(Parking_lot)
+            .join(Parking_spot)
+            .join(Reservation)
+            .filter(Reservation.user_id.ilike(f"%{query}%"))
+            .distinct()
+            .all()
+        )
+
+    return render_template("admin_dashboard.html", parking_lots=parking_lots, name=name)
+
