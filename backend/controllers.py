@@ -1,5 +1,5 @@
 # App routes
-from flask import Flask,render_template,request,redirect,url_for,flash, session
+from flask import Flask,render_template,request,redirect,url_for,flash, session,jsonify
 from flask import current_app as app
 from datetime import datetime, timedelta
 from .models import *
@@ -269,6 +269,45 @@ def admin_summary(name):
             r.cost = 0  
     return render_template("admin_summary.html", name=name,reservations=reservations)
 
+# for admin summary charts
+
+@app.route('/admin/summary/chart')
+@login_required
+def admin_summary_chart():
+    reservations = Reservation.query.all()
+
+    daily_counts = {}
+    for r in reservations:
+        date = r.start_time.strftime("%Y-%m-%d")
+        daily_counts[date] = daily_counts.get(date, 0) + 1
+
+    data = [{"date": date, "count": count} for date, count in sorted(daily_counts.items())]
+    return jsonify(data)
+@app.route('/admin/revenue/chart')
+@login_required
+def admin_revenue_chart():
+    reservations = Reservation.query.all()
+    revenue = {}
+
+    for r in reservations:
+        lot_name = r.parking_lot.name
+        revenue[lot_name] = revenue.get(lot_name, 0) + (r.cost or 0)
+
+    data = [{"lot": lot, "revenue": rev} for lot, rev in revenue.items()]
+    return jsonify(data)
+
+@app.route('/admin/status/chart')
+@login_required
+def admin_status_chart():
+    spots = Parking_spot.query.all()
+    available = sum(1 for s in spots if s.status)
+    occupied = len(spots) - available
+
+    data = {
+        "available": available,
+        "occupied": occupied
+    }
+    return jsonify(data)
 
 @app.route("/user/<name>/summary")
 @login_required
@@ -297,6 +336,36 @@ def user_summary(name):
             total_cost += reservation.cost
 
     return render_template("user_summary.html", user=user, name=name, history=history, total_minutes=int(total_minutes), total_cost=round(total_cost, 2))
+
+# for user summary chart
+@app.route('/user/history/chart')
+@login_required
+def user_history_chart():
+    user_id = current_user.id
+    reservations = Reservation.query.filter_by(user_id=user_id).all()
+
+    data = [
+        {
+            "date": r.park_time.strftime("%Y-%m-%d") if r.park_time else "N/A",
+            "duration": int((r.release_time - r.park_time).total_seconds() // 60)
+        }
+        for r in reservations if r.park_time and r.release_time
+    ]
+    return jsonify(data)
+
+@app.route('/user/spot-usage/chart')
+@login_required
+def user_spot_usage_chart():
+    user_id = current_user.id
+    reservations = Reservation.query.filter_by(user_id=user_id).all()
+    
+    spot_usage = {}
+    for r in reservations:
+        spot_id = f"Spot {r.parking_spot.id}"
+        spot_usage[spot_id] = spot_usage.get(spot_id, 0) + 1
+
+    data = [{"spot": spot, "count": count} for spot, count in spot_usage.items()]
+    return jsonify(data)
 
 # for book spot
 

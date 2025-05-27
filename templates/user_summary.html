@@ -46,9 +46,103 @@
   Total Cost: ₹{{ total_cost }}
 </div>
 
-<!-- Content -->
-<div class="chart-container">
+<!-- Chart Container -->
+<div class="chart-container mt-4">
     <canvas id="usageChart"></canvas>
-    <div class="chart-label">Summary on already used parking spots</div>
+    <div class="chart-label">Parking Duration Over Time</div>
 </div>
+<!-- Spot Usage Summary Chart -->
+<div class="chart-container mt-4">
+  <canvas id="spotUsageChart"></canvas>
+  <div class="chart-label">Summary on already used parking spots</div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Chart Script -->
+<script>
+fetch('/user/history/chart')
+  .then(response => response.json())
+  .then(data => {
+    const labels = data.map(d => d.date);
+    const durations = data.map(d => d.duration);
+
+    const ctx = document.getElementById('usageChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Duration (minutes)',
+          data: durations,
+          backgroundColor: 'rgba(153, 102, 255, 0.6)',
+          borderColor: 'rgba(153, 102, 255, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Parking Duration per Reservation'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Duration (minutes)'
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+<!-- Spot Usage Chart Script -->
+<script>
+fetch('/user/spot-usage/chart')
+  .then(response => response.json())
+  .then(data => {
+    const labels = data.map(d => d.spot);
+    const counts = data.map(d => d.count);
+
+    const ctx = document.getElementById('spotUsageChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Number of Times Used',
+          data: counts,
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Usage Count Per Spot'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Times Used'
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+
 {% endblock %}
