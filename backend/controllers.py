@@ -1,27 +1,37 @@
 # App routes
-from flask import Flask,render_template,request,redirect,url_for
+from flask import Flask,render_template,request,redirect,url_for,flash, session
 from flask import current_app as app
 from datetime import datetime, timedelta
 from .models import *
 import math
+from app import login_manager
+from flask_login import login_user, login_required, logout_user, current_user
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
-@app.route("/login",methods=["GET","POST"])
+@app.route("/login", methods=["GET", "POST"])
 def signin():
-    if request.method=="POST":
-        uname=request.form.get("user_name")
-        pwd=request.form.get("password")
-        usr=User.query.filter_by(email=uname,password=pwd).first()
-        if usr and usr.role==0: #Existed and admin
-            return redirect(url_for("admin_dashboard",name=uname))
-        elif usr and usr.role==1: #Existed and normal user
-            return redirect(url_for("user_dashboard",name=uname))
+    if request.method == "POST":
+        uname = request.form.get("user_name")
+        pwd = request.form.get("password")
+        usr = User.query.filter_by(email=uname, password=pwd).first()
+        if usr:
+            login_user(usr)
+            session.pop('_flashes', None)
+            flash("Login successful!", "success")
+            if usr.role == 0:
+                return redirect(url_for("admin_dashboard", name=usr.email))
+            else:
+                return redirect(url_for("user_dashboard", name=usr.email))
         else:
-            return render_template("login.html",msg="Invalid user...!!!")
+            flash("Invalid credentials. Please try again.", "error")
     return render_template("login.html",msg="")
 
 
@@ -35,19 +45,31 @@ def signup():
         pin_code=request.form.get("pin_code")
         usr=User.query.filter_by(email=uname).first()
         if usr:
-            return render_template("signup.html",msg="Sorry, this mail already registered!!!")
+            flash("Email already registered.", "warning")
+            return redirect(url_for("signup"))
         new_usr=User(email=uname,password=pwd,full_name=full_name,address=address,pin_code=pin_code)
         db.session.add(new_usr)
         db.session.commit()
-        return render_template("login.html",msg="Registration successful, try login now!")
-    return render_template("signup.html",msg="")
+        flash("Registration successful. Please log in.", "success")        
+        return redirect(url_for("signin"))
+    return render_template("signup.html")
 
-#def my_encrypt():
-    # code here
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    session.clear() 
+    flash("You have been logged out.", "info")
+    return redirect(url_for("signin"))
+
 
 # common route for admin dashboard
 @app.route("/admin/<name>")
+@login_required
 def admin_dashboard(name):
+    if current_user.role != 0:
+        flash("Unauthorized access to admin dashboard.", "danger")
+        return redirect(url_for("user_dashboard", name=current_user.email))
     parking_lots=get_parking_lots()
     
     for parking_lot in parking_lots:
@@ -56,7 +78,11 @@ def admin_dashboard(name):
 
 # common route for user dashboard
 @app.route("/user/<name>")
+@login_required
 def user_dashboard(name):
+    if current_user.role != 1:
+        flash("Unauthorized access to user dashboard.", "danger")
+        return redirect(url_for("admin_dashboard", name=current_user.email))
     user = User.query.filter_by(email=name).first()
     if not user:
         return "User not found", 404
@@ -88,6 +114,7 @@ def user_dashboard(name):
     return render_template("user_dashboard.html",name=name,reservations=reservations,search_query=search_query,parking_lots=parking_lots, available_data=available_data,now=current_time,active_reservations=active_reservations, ended_reservations=ended_reservations)
 
 @app.route("/parking_lot/<name>",methods=["GET","POST"])
+@login_required
 def add_parking_lot(name):
     if request.method=="POST":
         lname=request.form.get("name")
@@ -110,6 +137,7 @@ def add_parking_lot(name):
 
         db.session.commit()  # Commit the spots to the DB
         print(f"Generated {max_spots} spots for lot id {new_lot.id}")
+        flash(f"Parking lot '{lname}' added successfully with {max_spots} spots.", "success")
 
         return redirect(url_for("admin_dashboard",name=name))
 
@@ -118,6 +146,7 @@ def add_parking_lot(name):
 
 # for edit parking lots
 @app.route("/edit_parking_lot/<int:lot_id>/<name>", methods=["GET", "POST"])
+@login_required
 def edit_parking_lot(lot_id, name):
     lot = Parking_lot.query.get_or_404(lot_id)
     
@@ -143,21 +172,24 @@ def edit_parking_lot(lot_id, name):
 
         lot.max_spots = new_max_spots
         db.session.commit()
-
+        flash("Parking lot updated successfully.", "success")
         return redirect(url_for("admin_dashboard", name=name))
 
     return render_template("edit_parking_lot.html", lot=lot, name=name)
 
 # for delete parking lots
 @app.route("/delete_parking_lot/<int:lot_id>/<name>")
+@login_required
 def delete_parking_lot(lot_id, name):
     lot = Parking_lot.query.get_or_404(lot_id)
     db.session.delete(lot)  # Will also delete spots due to cascade
     db.session.commit()
+    flash("Parking lot deleted successfully.", "info")
     return redirect(url_for("admin_dashboard", name=name))
 
 # for managing spots
 @app.route("/manage_spot/<int:spot_id>", methods=["POST"])
+@login_required
 def manage_spot(spot_id):
     spot = Parking_spot.query.get(spot_id)
     if not spot:
@@ -172,6 +204,7 @@ def manage_spot(spot_id):
     db.session.commit()
 
     name = request.args.get("name")
+    flash("Spot status updated.", "info")
     return redirect(url_for("admin_dashboard", name=name))  # or use dynamic name if needed
 
 
@@ -179,17 +212,19 @@ def manage_spot(spot_id):
 
 
 @app.route("/view_spot/<int:spot_id>/<int:lot_id>/<name>")
+@login_required
 def view_spot(spot_id, lot_id, name):
     spot = Parking_spot.query.get_or_404(spot_id)
     return render_template("view_spot.html", spot=spot, lot_id=lot_id, name=name)
 
 # for delete spot
 @app.route("/delete_spot/<int:spot_id>/<int:lot_id>/<name>")
+@login_required
 def delete_spot(spot_id, lot_id, name):
     spot = Parking_spot.query.get_or_404(spot_id)
 
     if spot.status != 'A':
-
+        flash("Cannot delete an occupied/reserved spot.", "warning")
         return redirect(url_for("view_spot", lot_id=lot_id, name=name))
 
     db.session.delete(spot)
@@ -197,7 +232,7 @@ def delete_spot(spot_id, lot_id, name):
     if lot.max_spots > 0:
         lot.max_spots -= 1
     db.session.commit()
-   
+    flash("Spot deleted successfully.", "info")   
     return redirect(url_for("admin_dashboard", name=name))
 
 # other supported function
@@ -210,11 +245,13 @@ def get_parking_lots():
 # done the auth today too
 
 @app.route("/admin/<name>/users")
+@login_required
 def admin_users(name):
     users = User.query.all()
     return render_template("users.html", name=name, users=users)
 
 @app.route("/admin/<name>/summary")
+@login_required
 def admin_summary(name):
     reservations = Reservation.query.order_by(Reservation.park_time.desc()).all()
 
@@ -234,6 +271,7 @@ def admin_summary(name):
 
 
 @app.route("/user/<name>/summary")
+@login_required
 def user_summary(name):
     user = User.query.filter_by(email=name).first()
     if not user:
@@ -263,6 +301,7 @@ def user_summary(name):
 # for book spot
 
 @app.route('/book_spot/<int:lot_id>/<string:name>', methods=['POST'])
+@login_required
 def book_spot(lot_id, name):
     user = User.query.filter_by(email=name).first()
     if not user:
@@ -303,6 +342,7 @@ def book_spot(lot_id, name):
 
 # for start parking in spot
 @app.route('/start_parking/<int:reservation_id>/<string:name>', methods=['POST'])
+@login_required
 def start_parking(reservation_id, name):
     reservation = Reservation.query.get_or_404(reservation_id)
 
@@ -316,6 +356,7 @@ def start_parking(reservation_id, name):
 
 # for relese spot
 @app.route('/release_reservation/<int:reservation_id>/<string:name>', methods=['POST'])
+@login_required
 def release_reservation(reservation_id, name):
     reservation = Reservation.query.get_or_404(reservation_id)
     
@@ -345,9 +386,12 @@ def release_reservation(reservation_id, name):
 # for edit ptofile for both user and admin dashboard 
 
 @app.route('/edit_profile/<string:name>', methods=['GET', 'POST'])
+@login_required
 def edit_profile(name):
     user = User.query.filter_by(email=name).first_or_404()
-
+    if not user:
+        flash("User not found.", "error")
+        return redirect(url_for("signin"))
     if request.method == 'POST':
         full_name = request.form.get('full_name')
         address = request.form.get('address')
@@ -360,7 +404,7 @@ def edit_profile(name):
         user.address = address
         user.pin_code = int(pin_code)
         db.session.commit()
-
+        flash("Profile updated successfully.", "success")
         if user.role == 0:
             return redirect(url_for('admin_dashboard', name=name))
         else:
@@ -370,6 +414,7 @@ def edit_profile(name):
 
 # for search funtion in user_dashboard 
 @app.route("/user/<name>/dashboard/search", methods=["GET"])
+@login_required
 def user_dashboard_search(name):
     user = User.query.filter_by(email=name).first()
     if not user:
@@ -398,6 +443,7 @@ def user_dashboard_search(name):
 # for search function in admin_dashboard
 
 @app.route("/admin/<name>/dashboard/search")
+@login_required
 def admin_dashboard_search(name):
     filter_by = request.args.get("filter_by")
     query = request.args.get("query")
