@@ -2,6 +2,7 @@
 from flask import Flask
 from backend.models import db
 from flask_login import LoginManager
+from backend.api_controllers import init_api,api
 
 app=None
 login_manager = None
@@ -11,6 +12,7 @@ def setup_app():
     app.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///vehicle_parking.sqlite3" # having db file
     app.config["SECRET_KEY"] = "my-secret-key"
     db.init_app(app) # flask app connected to db(SQL alchemy)
+    api.init_app(app)
     app.app_context().push()# direct access to other modules
     app.debug=True
 
