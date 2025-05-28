@@ -1,0 +1,67 @@
+.user-dashboard {
+  background: url('/static/images/parking-bg4.jpg') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+.user-dashboard .main-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  margin: 30px auto;
+  width: 95%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.user-dashboard .section-title {
+  color: #1e66d1;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.user-dashboard .box {
+  border: 2px solid #a3c9f9;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+/* Chart container for user summary page */
+.chart-container {
+  width: 50%;
+  margin: 50px auto;
+  text-align: center;
+}
+
+.chart-box {
+    max-width: 650px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.chart-label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.chart-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.chart-row .chart-box {
+  flex: 1 1 400px;
+}
+

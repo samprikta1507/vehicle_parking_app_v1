@@ -1,6 +1,7 @@
 {% extends "user_layout.html" if user.role == 1 else "admin_layout.html" %}
 
 {% block content %}
+<div class="main-content">
 <div class="container mt-5">
   <h3>Edit Profile</h3>
   <form method="POST">
@@ -19,5 +20,6 @@
     <button type="submit" class="btn btn-success">Update</button>
     <a href="{{ url_for('admin_dashboard' if user.role == 0 else 'user_dashboard', name=name) }}" class="btn btn-secondary">Cancel</a>
   </form>
+</div>
 </div>
 {% endblock %}

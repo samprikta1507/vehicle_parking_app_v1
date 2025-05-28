@@ -1,62 +1,91 @@
-*{
-    margin:10px;
+* {
+  margin: 10px;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.my_container{
-    border: 2px solid black;
-
+body {
+  font-family: Arial, sans-serif;
 }
 
-.my_panel{
-    width: 80%;
-    margin: auto;
-    height: auto;
-    border: 1px dashed black;
+.my_panel {
+  width: 80%;
+  margin: auto;
+  height: auto;
 }
 
-.input_form{
-    border: 1px solid blue;
-    width: 600px;
-    height: 600px;
-    margin: auto;
-    margin-top: 20px;
-    padding: 10px;
-    border-radius: 10px;
-    font-size: 16px;
-    text-align: justify;
+.input_form {
+  border: 1px solid blue;
+  width: 600px;
+  height: 600px;
+  margin: auto;
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 16px;
+  text-align: justify;
 }
 
-.outer_box{
-    border: 1px solid orange;
-    margin-top:10px;
-    margin: auto;
-    padding: 10px;
-    border-radius: 10px;
+.outer_box {
+  border: 1px solid orange;
+  margin-top: 10px;
+  margin: auto;
+  padding: 10px;
+  border-radius: 10px;
 }
 
-.center{
-    text-align: center;
-    margin: auto;
-    color: rgb(5, 5, 110);
+.center {
+  text-align: center;
+  margin: auto;
+  color: rgb(5, 5, 110);
 }
 
-.err_msg{
+.err_msg {
   text-align: center;
   margin: auto;
   color: maroon;
 }
 
-/* for admin_dashboards */
-
-.navbar-custom {
-    background-color: #d0f0c0;
+/* Navbar styles */
+.navbar {
+  background: linear-gradient(to right, #141e30, #243b55);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 0 0 10px 10px;
+  height: 70px;
 }
+
+.nav-link:hover {
+  color: #d1d1ff !important;
+  text-decoration: underline;
+}
+
+.btn-outline-light:hover {
+  background-color: #ffffff;
+  color: #1E2A78;
+  border-color: #ffffff;
+}
+
+.slim-navbar {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    min-height: 40px;
+}
+
+.slim-navbar .navbar-brand,
+.slim-navbar .nav-link {
+    font-size: 1.2rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+/* Spot grid and lot cards */
 .lot-card {
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 15px;
   margin: 10px;
 }
+
 .spot {
   width: 30px;
   height: 30px;
@@ -73,6 +102,7 @@
   gap: 5px;
   margin-top: 10px;
 }
+
 .spot-box {
   width: 40px;
   height: 40px;
@@ -83,85 +113,16 @@
   font-weight: bold;
   cursor: pointer;
 }
+
 .spot-box.available {
-  background-color: #a7f3d0; /* Green */
+  background-color: #a7f3d0;
 }
+
 .spot-box.occupied {
-  background-color: #f87171; /* Red */
+  background-color: #f87171;
 }
 
-
-
-  /* for user_dashboards */
-
-
-  .box {
-    border: 2px solid #a3c9f9;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 20px;
-  }
-  .section-title {
-    color: #1e66d1;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-  
-  /* for users in admin dashboard */
-  body {
-    font-family: Arial, sans-serif;
-  }
-
-  .navbar-custom {
-    background-color: #d0f0c0;
-    border-bottom: 1px solid #ccc;
-  }
-
-  .dashboard-title {
-    font-size: 22px;
-    color: #c0392b;
-    font-weight: bold;
-    text-align: center;
-    margin-top: 10px;
-  }
-
-  .section-title {
-    color: #216ef3;
-    font-weight: bold;
-    margin-top: 30px;
-    margin-bottom: 10px;
-    font-size: 18px;
-  }
-
-  .box {
-    border: 2px solid #a3c9f9;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 20px;
-  }
-
-  .footer-note {
-    color: red;
-    font-style: italic;
-    margin-top: 10px;
-    text-align: left;
-  }
-
-  /* for admin summary page */
-
-
-
-  .summary-subtitle {
-    color: #e67e22;
-    text-align: center;
-    margin-top: 10px;
-    font-weight: bold;
-  }
-
-
-
-/* for search bar */
-
+/* Search section */
 .search-section {
   margin: 30px auto;
   text-align: center;
@@ -180,11 +141,4 @@
   margin: 30px 0 15px;
   text-align: center;
   font-weight: bold;
-}
-
-/* for user summary page */
-.chart-container {
-  width: 50%;
-  margin: 50px auto;
-  text-align: center;
 }

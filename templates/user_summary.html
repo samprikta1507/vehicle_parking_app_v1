@@ -1,5 +1,6 @@
 {% extends "user_layout.html" %}
 {% block content %}
+<div class="main-content">
 <div class="container mt-4">
   <h2 class="mb-3">Reservation Summary for {{ user.full_name }}</h2>
 
@@ -47,14 +48,16 @@
 </div>
 
 <!-- Chart Container -->
-<div class="chart-container mt-4">
-    <canvas id="usageChart"></canvas>
+<div class="chart-row">
+  <div class="chart-box">
+    <canvas id="usageChart" width="400" height="250"></canvas>
     <div class="chart-label">Parking Duration Over Time</div>
-</div>
-<!-- Spot Usage Summary Chart -->
-<div class="chart-container mt-4">
-  <canvas id="spotUsageChart"></canvas>
-  <div class="chart-label">Summary on already used parking spots</div>
+  </div>
+
+  <div class="chart-box">
+    <canvas id="spotUsageChart" width="400" height="250"></canvas>
+    <div class="chart-label">Summary on already used parking spots</div>
+  </div>
 </div>
 
 <!-- Chart.js CDN -->
@@ -144,5 +147,5 @@ fetch('/user/spot-usage/chart')
     });
   });
 </script>
-
+</div>
 {% endblock %}

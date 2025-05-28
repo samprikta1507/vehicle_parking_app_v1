@@ -1,0 +1,87 @@
+.admin-dashboard {
+  background: url('/static/images/parking-bg3.jpg') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+.admin-dashboard .main-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  margin: 30px auto;
+  width: 95%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.admin-dashboard .navbar-custom {
+  background-color: #d0f0c0;
+  border-bottom: 1px solid #ccc;
+}
+
+.admin-dashboard .dashboard-title {
+  font-size: 22px;
+  color: #c0392b;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.admin-dashboard .section-title {
+  color: #216ef3;
+  font-weight: bold;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.admin-dashboard .box {
+  border: 2px solid #a3c9f9;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.admin-dashboard .footer-note {
+  color: red;
+  font-style: italic;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.admin-dashboard .summary-subtitle {
+  color: #e67e22;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
+.chart-box {
+    max-width: 650px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.chart-label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.chart-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.chart-row .chart-box {
+  flex: 1 1 400px;
+}

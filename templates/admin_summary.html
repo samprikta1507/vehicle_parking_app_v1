@@ -1,6 +1,6 @@
 {% extends "admin_layout.html" %}
 {% block content %}
-
+<div class="main-content">
             <!-- Content -->
             <div class="container mt-4">
                 <div class="dashboard-title">Admin Dashboard</div>
@@ -38,25 +38,19 @@
                 <div class="summary-subtitle">Summary shows statistical charts</div>
 
                     <!-- Charts -->
-                    <div class="chart-container">
+                <div class="chart-row">
 
-                        <div class="chart-box">
-                            <canvas id="summaryChart"></canvas>
-                            <div class="chart-label">Reservations per Day</div>
-                        </div>
+                  <div class="chart-box">
+                      <canvas id="summaryChart" width="400" height="250"></canvas>
+                      <div class="chart-label">Reservations per Day</div>
+                  </div>
 
-                        <div class="chart-box">
-                            <canvas id="revenueChart"></canvas>
-                            <div class="chart-label">Revenue from each parking lot</div>
-                        </div>
+                  <div class="chart-box">
+                      <canvas id="revenueChart" width="400" height="250"></canvas>
+                      <div class="chart-label">Revenue from each parking lot</div>
+                  </div>
 
-                        <div class="chart-box">
-                            <canvas id="statusChart"></canvas>
-                            <div class="chart-label">Summary on available and occupied parking lots</div>
-                        </div>
-
-                    </div>
-                </div>
+              </div>
 
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -137,41 +131,5 @@ fetch('/admin/revenue/chart')
     });
   });
 </script>
-<!-- Status Chart Script -->
-<script>
-fetch('/admin/status/chart')
-  .then(response => response.json())
-  .then(data => {
-    const ctx = document.getElementById('statusChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Available', 'Occupied'],
-        datasets: [{
-          label: 'Spot Status',
-          data: [data.available, data.occupied],
-          backgroundColor: [
-            'rgba(54, 162, 235, 0.7)',
-            'rgba(255, 159, 64, 0.7)'
-          ],
-          borderColor: [
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 159, 64, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          title: {
-            display: true,
-            text: 'Parking Spot Availability'
-          }
-        }
-      }
-    });
-  });
-</script>
-
+</div>
 {% endblock %}
