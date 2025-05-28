@@ -21,6 +21,14 @@ def signin():
     if request.method == "POST":
         uname = request.form.get("user_name")
         pwd = request.form.get("password")
+        if not uname or not pwd:
+            flash("Both email and password are required.", "error")
+            return render_template("login.html", msg="")
+
+        if "@" not in uname or "." not in uname:
+            flash("Invalid email format.", "error")
+            return render_template("login.html", msg="")
+
         usr = User.query.filter_by(email=uname, password=pwd).first()
         if usr:
             login_user(usr)
@@ -43,6 +51,21 @@ def signup():
         full_name=request.form.get("full_name")
         address=request.form.get("address")
         pin_code=request.form.get("pin_code")
+        if not all([uname, pwd, full_name, address, pin_code]):
+            flash("All fields are required.", "error")
+            return redirect(url_for("signup"))
+
+        if "@" not in uname or "." not in uname:
+            flash("Invalid email format.", "error")
+            return redirect(url_for("signup"))
+
+        if len(pwd) < 6:
+            flash("Password must be at least 6 characters.", "error")
+            return redirect(url_for("signup"))
+
+        if not pin_code.isdigit() or len(pin_code) != 6:
+            flash("Pin code must be a 6-digit number.", "error")
+            return redirect(url_for("signup"))
         usr=User.query.filter_by(email=uname).first()
         if usr:
             flash("Email already registered.", "warning")
@@ -122,7 +145,24 @@ def add_parking_lot(name):
         pin_code=request.form.get("pin_code")
         price=request.form.get("price")
         max_spots=int(request.form.get("max_spots"))
+        if not all([lname, address, pin_code, price, max_spots]):
+            flash("All fields are required.", "error")
+            return render_template("add_parking_lot.html", name=name)
 
+        if not pin_code.isdigit() or len(pin_code) != 6:
+            flash("Pin code must be a 6-digit number.", "error")
+            return render_template("add_parking_lot.html", name=name)
+
+        if not price.isdigit() or int(price) < 0:
+            flash("Price must be a non-negative number.", "error")
+            return render_template("add_parking_lot.html", name=name)
+
+        if not max_spots.isdigit() or int(max_spots) <= 0:
+            flash("Max spots must be a positive number.", "error")
+            return render_template("add_parking_lot.html", name=name)
+
+        price = int(price)
+        max_spots = int(max_spots)
         new_lot=Parking_lot(name=lname,address=address,pin_code=pin_code,price=price,max_spots=max_spots)
         db.session.add(new_lot)
         db.session.commit()
@@ -404,7 +444,7 @@ def book_spot(lot_id, name):
     
     db.session.add(reservation)
     db.session.commit()
-
+    flash("Booked spot successful.", "success")
     return redirect(url_for('user_dashboard', name=name))
 
 
@@ -421,6 +461,7 @@ def start_parking(reservation_id, name):
         spot = Parking_spot.query.get(reservation.spot_id)
         spot.status = 'O'  
         db.session.commit()
+    flash("car parked.", "success")
     return redirect(url_for('user_dashboard', name=name))
 
 # for relese spot
@@ -447,6 +488,7 @@ def release_reservation(reservation_id, name):
     spot.status = 'A' 
 
     db.session.commit()
+    flash("Released spot successful.", "success")
 
     return redirect(url_for('user_dashboard', name=name))
 
@@ -467,6 +509,10 @@ def edit_profile(name):
         pin_code = request.form.get('pin_code')
 
         if not full_name or not address or not pin_code.isdigit():
+            return redirect(url_for('edit_profile', name=name))
+        
+        if not pin_code.isdigit() or len(pin_code) != 6:
+            flash("Pin code must be a 6-digit number.", "error")
             return redirect(url_for('edit_profile', name=name))
 
         user.full_name = full_name
