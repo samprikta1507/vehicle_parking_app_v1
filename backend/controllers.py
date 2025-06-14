@@ -136,15 +136,16 @@ def user_dashboard(name):
 
     return render_template("user_dashboard.html",name=name,reservations=reservations,search_query=search_query,parking_lots=parking_lots, available_data=available_data,now=current_time,active_reservations=active_reservations, ended_reservations=ended_reservations)
 
-@app.route("/parking_lot/<name>",methods=["GET","POST"])
+@app.route("/parking_lot/<name>", methods=["GET", "POST"])
 @login_required
 def add_parking_lot(name):
-    if request.method=="POST":
-        lname=request.form.get("name")
-        address=request.form.get("address")
-        pin_code=request.form.get("pin_code")
-        price=request.form.get("price")
-        max_spots=int(request.form.get("max_spots"))
+    if request.method == "POST":
+        lname = request.form.get("name")
+        address = request.form.get("address")
+        pin_code = request.form.get("pin_code")
+        price = request.form.get("price")
+        max_spots = request.form.get("max_spots")  
+
         if not all([lname, address, pin_code, price, max_spots]):
             flash("All fields are required.", "error")
             return render_template("add_parking_lot.html", name=name)
@@ -160,14 +161,13 @@ def add_parking_lot(name):
         if not max_spots.isdigit() or int(max_spots) <= 0:
             flash("Max spots must be a positive number.", "error")
             return render_template("add_parking_lot.html", name=name)
-
+        #  convert to int
         price = int(price)
         max_spots = int(max_spots)
-        new_lot=Parking_lot(name=lname,address=address,pin_code=pin_code,price=price,max_spots=max_spots)
+        new_lot = Parking_lot(name=lname, address=address, pin_code=pin_code, price=price, max_spots=max_spots)
         db.session.add(new_lot)
         db.session.commit()
-
-         # Auto-generate parking spots after lot is added
+        # Auto-generate parking spots
         for _ in range(max_spots):
             new_spot = Parking_spot(
                 lot_id=new_lot.id,
@@ -175,14 +175,13 @@ def add_parking_lot(name):
             )
             db.session.add(new_spot)
 
-        db.session.commit()  # Commit the spots to the DB
+        db.session.commit()
         print(f"Generated {max_spots} spots for lot id {new_lot.id}")
         flash(f"Parking lot '{lname}' added successfully with {max_spots} spots.", "success")
+        return redirect(url_for("admin_dashboard", name=name))
 
-        return redirect(url_for("admin_dashboard",name=name))
+    return render_template("add_parking_lot.html", name=name)
 
-
-    return render_template("add_parking_lot.html",name=name)
 
 # for edit parking lots
 @app.route("/edit_parking_lot/<int:lot_id>/<name>", methods=["GET", "POST"])
@@ -255,25 +254,14 @@ def manage_spot(spot_id):
 @login_required
 def view_spot(spot_id, lot_id, name):
     spot = Parking_spot.query.get_or_404(spot_id)
-    return render_template("view_spot.html", spot=spot, lot_id=lot_id, name=name)
-
-# for delete spot
-@app.route("/delete_spot/<int:spot_id>/<int:lot_id>/<name>")
-@login_required
-def delete_spot(spot_id, lot_id, name):
-    spot = Parking_spot.query.get_or_404(spot_id)
-
+    reservation = None
     if spot.status != 'A':
-        flash("Cannot delete an occupied/reserved spot.", "warning")
-        return redirect(url_for("view_spot", lot_id=lot_id, name=name))
+        reservation = Reservation.query \
+            .filter_by(spot_id=spot.id) \
+            .order_by(Reservation.park_time.desc()) \
+            .first()
+    return render_template("view_spot.html", spot=spot, lot_id=lot_id, name=name ,reservation=reservation)
 
-    db.session.delete(spot)
-    lot = Parking_lot.query.get_or_404(lot_id)
-    if lot.max_spots > 0:
-        lot.max_spots -= 1
-    db.session.commit()
-    flash("Spot deleted successfully.", "info")   
-    return redirect(url_for("admin_dashboard", name=name))
 
 # other supported function
 def get_parking_lots():
@@ -396,6 +384,21 @@ def user_spot_usage_chart():
     data = [{"spot": spot, "count": count} for spot, count in spot_usage.items()]
     return jsonify(data)
 
+@app.route('/show_booking_form/<int:lot_id>/<string:name>', methods=['GET'])
+@login_required
+def show_booking_form(lot_id, name):
+    user = User.query.filter_by(email=name).first()
+    if not user:
+        return redirect(url_for('user_dashboard', name=name))
+
+    lot = Parking_lot.query.get_or_404(lot_id)
+    spot = Parking_spot.query.filter_by(lot_id=lot_id, status='A').first()
+    if not spot:
+        flash("No available spot in this lot.", "danger")
+        return redirect(url_for('user_dashboard', name=name))
+
+    return render_template('booking_form.html', lot=lot, user=user, spot=spot ,name=name)
+
 # for book spot
 
 @app.route('/book_spot/<int:lot_id>/<string:name>', methods=['POST'])
@@ -406,7 +409,7 @@ def book_spot(lot_id, name):
         return redirect(url_for('user_dashboard', name=name))
     
     lot = Parking_lot.query.get_or_404(lot_id)
-
+    car_number = request.form.get('car_number')
     start_time_str = request.form['start_time']
     duration = int(request.form['duration'])
 
@@ -425,7 +428,8 @@ def book_spot(lot_id, name):
         release_time=None, 
         lot_id=lot_id,
         spot_id=spot.id,
-        user_id=user.id
+        user_id=user.id,
+        car_number=car_number
     )
 
 

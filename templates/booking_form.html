@@ -1,0 +1,46 @@
+{% extends "user_layout.html" %}
+{% block content %}
+<div class="main-content">
+    <div class="center"><h3>Book the Parking Spot</h3></div>
+    <form method="POST" action="{{ url_for('book_spot', lot_id=lot.id, name=user.email) }}">
+        <div class="input_form">
+
+            <div class="mb-3">
+                <label for="spot_id" class="form-label">Spot ID</label>
+                <input type="text" class="form-control" name="spot_id" id="spot_id" value="{{ spot.id }}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="lot_id" class="form-label">Lot ID</label>
+                <input type="text" class="form-control" name="lot_id" id="lot_id" value="{{ lot.id }}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="user_id" class="form-label">User ID</label>
+                <input type="text" class="form-control" name="user_id" id="user_id" value="{{ user.id }}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="car_number" class="form-label">Vehicle Number</label>
+                <input type="text" class="form-control" name="car_number" id="car_number" placeholder="Enter vehicle number" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="start_time" class="form-label">Start Time</label>
+                <input type="datetime-local" class="form-control" name="start_time" id="start_time" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="duration" class="form-label">Duration (hours)</label>
+                <input type="number" class="form-control" name="duration" id="duration" value="1" min="1" required>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Book</button>
+                <a href="{{ url_for('user_dashboard', name=user.email) }}" class="btn btn-secondary">Cancel</a>
+            </div>
+
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -90,28 +90,13 @@
                           <td>{{ lot.available_spots }}/{{ lot.total_spots }}</td>
                           <td>
                             {% if lot.available_spots > 0 %}
-                              <form method="POST" action="{{ url_for('book_spot', lot_id=lot.id, name=name) }}">
-                                <div class="row">
-                                  <div class="col">
-                                    <input type="datetime-local" name="start_time" value="{{ now.strftime('%Y-%m-%dT%H:%M') }}" min="{{ now.strftime('%Y-%m-%dT%H:%M') }}" required class="form-control">
-                                  </div>
-                                  <div class="col">
-                                    <select name="duration" required class="form-control">
-                                      <option value="1">1 hour</option>
-                                      <option value="2">2 hours</option>
-                                      <option value="3">3 hours</option>
-                                      <option value="4">4 hours</option>
-                                    </select>
-                                  </div>
-                                  <div class="col">
-                                    <button type="submit" class="btn btn-outline-primary btn-sm">Book</button>
-                                  </div>
-                                </div>
-                              </form>
-                          {% else %}
-                            <button class="btn btn-outline-secondary" disabled>Full</button>
-                          {% endif %}
-                        </td>
+                              <a href="{{ url_for('show_booking_form', lot_id=lot.id, name=name) }}" class="btn btn-primary">
+                                Book
+                              </a>
+                            {% else %}
+                              <button class="btn btn-outline-secondary" disabled>Full</button>
+                            {% endif %}
+                          </td>
                       </tr>
                       {% endfor %}
                     </tbody>

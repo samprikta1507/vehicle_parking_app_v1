@@ -48,6 +48,7 @@ class Reservation(db.Model):
     park_time=db.Column(db.DateTime,nullable=True) # actual start
     release_time=db.Column(db.DateTime,nullable=True) # actual end
     cost=db.Column(db.Float,default=0.0)
+    car_number = db.Column(db.String, nullable=False)
     lot_id=db.Column(db.Integer, db.ForeignKey("parking_lot.id"),nullable=False)
     spot_id=db.Column(db.Integer, db.ForeignKey("parking_spot.id"),nullable=False)
     user_id=db.Column(db.Integer, db.ForeignKey("user.id"),nullable=False)

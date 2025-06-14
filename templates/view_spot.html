@@ -1,26 +1,64 @@
 {% extends "admin_layout.html" %}
 {% block content %}
 <div class="main-content">
-<div class="container mt-4">
+
     <h3 class="center">Spot Details</h3>
     <div class="input_form">
+
+      <!-- Always show Spot ID -->
+      <div class="mb-3">
+        <label>Spot ID:</label>
+        <input type="text" class="form-control" value="{{ spot.id }}" readonly>
+      </div>
+
+      {% if spot.status == 'A' %}
+        <!-- Available Spot -->
         <div class="mb-3">
-            <label>Spot ID:</label>
-            <input type="text" class="form-control" value="{{ spot.id }}" readonly>
+          <label>Status:</label>
+          <input type="text" class="form-control text-success fw-bold" value="Available" readonly>
         </div>
+        <div class="alert alert-success">This spot is currently available.</div>
+
+      {% else %}
+        <!-- Occupied Spot -->
         <div class="mb-3">
-            <label>Status:</label>
-            <input type="text" class="form-control" value="{{ spot.status }}" readonly>
+          <label>Status:</label>
+          <input type="text" class="form-control text-danger fw-bold" value="Occupied" readonly>
         </div>
 
-        {% if spot.status == 'A' %}
-        <a href="{{ url_for('delete_spot', spot_id=spot.id, lot_id=lot_id, name=name) }}" class="btn btn-danger">Delete</a>
+        {% if reservation %}
+          <div class="mb-3">
+            <label>Lot ID:</label>
+            <input type="text" class="form-control" value="{{ lot_id }}" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label>User ID:</label>
+            <input type="text" class="form-control" value="{{ reservation.user_id }}" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label>Vehicle Number:</label>
+            <input type="text" class="form-control" value="{{ reservation.car_number }}" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label>Start Time:</label>
+            <input type="text" class="form-control" value="{{ reservation.park_time.strftime('%d/%m/%Y %H:%M') }}" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label>Parking Cost:</label>
+            <input type="text" class="form-control" value="{{ reservation.cost }}" readonly>
+          </div>
         {% else %}
-        <button class="btn btn-secondary" disabled>Cannot Delete (Occupied)</button>
+          <div class="alert alert-warning">Spot marked as occupied but no reservation found.</div>
         {% endif %}
+      {% endif %}
 
-        <a href="{{ url_for('admin_dashboard', name=name) }}" class="btn btn-secondary">Back</a>
+      <a href="{{ url_for('admin_dashboard', name=name) }}" class="btn btn-secondary">Back</a>
+
     </div>
-</div>
+
 </div>
 {% endblock %}
