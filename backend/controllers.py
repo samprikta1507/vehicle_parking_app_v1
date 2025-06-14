@@ -324,6 +324,19 @@ def admin_revenue_chart():
     data = [{"lot": lot, "revenue": rev} for lot, rev in revenue.items()]
     return jsonify(data)
 
+@app.route('/admin/spots/chart')
+@login_required
+def admin_spots_chart():
+    total_spots = Parking_spot.query.count()
+    occupied_spots = Parking_spot.query.filter_by(status='O').count()
+    available_spots = total_spots - occupied_spots
+
+    return jsonify({
+        "available": available_spots,
+        "occupied": occupied_spots
+    })
+
+
 
 
 @app.route("/user/<name>/summary")

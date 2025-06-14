@@ -50,6 +50,11 @@
                       <div class="chart-label">Revenue from each parking lot</div>
                   </div>
 
+                  <div class="chart-box">
+                      <canvas id="spotAvailabilityChart" width="400" height="250"></canvas>
+                      <div class="chart-label">Parking Spot Overview</div>
+                  </div>
+
               </div>
 
 <!-- Chart.js CDN -->
@@ -131,5 +136,37 @@ fetch('/admin/revenue/chart')
     });
   });
 </script>
+<!-- Spot Availability Chart -->
+<script>
+fetch('/admin/spots/chart')
+  .then(response => response.json())
+  .then(data => {
+    const ctx = document.getElementById('spotAvailabilityChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Available Spots', 'Occupied Spots'],
+        datasets: [{
+          label: 'Spot Status',
+          data: [data.available, data.occupied],
+          backgroundColor: ['#28a745', '#dc3545'],
+          borderColor: ['#ffffff', '#ffffff'],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' },
+          title: {
+            display: true,
+            text: 'Overall Parking Spot Availability'
+          }
+        }
+      }
+    });
+  });
+</script>
+
 </div>
 {% endblock %}
