@@ -1,9 +1,71 @@
 from flask_restful import Resource, Api
 from flask import request
-from backend.models import db, Parking_lot, Parking_spot, Reservation
+from backend.models import db, User, Parking_lot, Parking_spot, Reservation
 from datetime import datetime
 
 api = Api()
+
+class UserApi(Resource):
+    def get(self):
+        users = User.query.all()
+        return [{
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "address": user.address,
+            "pin_code": user.pin_code,
+            "role": user.role,
+            "password": user.password
+        } for user in users]
+    
+    def post(self):
+        data = request.json
+        new_user = User(
+            email=data.get("email"),
+            full_name=data.get("full_name"),
+            address=data.get("address"),
+            pin_code=data.get("pin_code"),
+            role=data.get("role"),
+            password=data.get("password")
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        return {"message": "New User added!"}, 201
+    
+    def put(self, id):
+        user = User.query.get(id)
+        if user:
+            data = request.json
+            user.email=data.get("email")
+            user.full_name = data.get("full_name")
+            user.address = data.get("address")
+            user.pin_code = data.get("pin_code")
+            user.role = data.get("role")
+            db.session.commit()
+            return {"message": "User updated!"}, 200
+        return {"message": "User ID not found!"}, 404
+
+    def delete(self, id):
+        user = User.query.get(id)
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            return {"message": "User deleted!"}, 200
+        return {"message": "User ID not found!"}, 404
+class UserSearchApi(Resource):
+    def get(self, id):
+        user = User.query.get(id)
+        if user:
+            return {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "address": user.address,
+                "pin_code": user.pin_code,
+                "role": user.role,
+                "password": user.password
+            }
+        return {"message": "User ID not found"}, 404
 
 
 class LotApi(Resource):
@@ -143,7 +205,8 @@ class ReservationApi(Resource):
             lot_id=data.get("lot_id"),
             spot_id=data.get("spot_id"),
             start_time=datetime.fromisoformat(data.get("start_time")),
-            end_time=datetime.fromisoformat(data.get("end_time"))
+            end_time=datetime.fromisoformat(data.get("end_time")),
+            car_number=data.get("car_number")
         )
         db.session.add(new_res)
         db.session.commit()
@@ -177,6 +240,8 @@ class ReservationSearchApi(Resource):
             }]
         return {"message": "Reservation ID not found!"}, 404
 
+api.add_resource(UserApi, "/api/get_users", "/api/add_user", "/api/edit_user/<int:id>", "/api/delete_user/<int:id>")
+api.add_resource(UserSearchApi, "/api/get_user/<int:id>")
 
 api.add_resource(LotApi,  "/api/get_lots", "/api/add_lot", "/api/edit_lot/<int:id>", "/api/delete_lot/<int:id>")
 
