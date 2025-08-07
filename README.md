@@ -85,20 +85,20 @@ There are two types of users:
 ---
 ## 📁 Project Structure
 
-├── backend/
-│ ├── models.py
-│ ├── controllers.py
-│ └── api_controllers.py
-├── instance/
-│ └── vehicle_parking.sqlite3
-├── static/
-│ ├── images/
-│ └── styles/
-├── templates/
-│ └── *.html
-├── app.py
-├── requirements.txt
-└── README.md
+- ├── backend/
+- │ ├── models.py
+- │ ├── controllers.py
+- │ └── api_controllers.py
+- ├── instance/
+- │ └── vehicle_parking.sqlite3
+- ├── static/
+- │ ├── images/
+- │ └── styles/
+- ├── templates/
+- │ └── *.html
+- ├── app.py
+- ├── requirements.txt
+- └── README.md
 
 ## 🧩 Entity Relationship Diagram
 
